@@ -1,0 +1,70 @@
+name: Build and release Windows
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build setup and portable executables
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20.19.0
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check and compile
+        run: npm run check
+
+      - name: Build Windows executables
+        run: npm run dist:win
+
+      - name: Read release metadata
+        id: release
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=v$version-build.${{ github.run_number }}" >> $env:GITHUB_OUTPUT
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = '${{ steps.release.outputs.version }}'
+          $tag = '${{ steps.release.outputs.tag }}'
+          $title = "PokeDesk v$version (build ${{ github.run_number }})"
+          $assets = @(
+            "release/PokeDesk-$version-Setup.exe#Windows setup installer"
+            "release/PokeDesk-$version-Portable.exe#Portable Windows executable"
+          )
+
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag $assets --clobber
+            gh release edit $tag --title $title --latest
+          } else {
+            gh release create $tag $assets `
+              --target '${{ github.sha }}' `
+              --title $title `
+              --generate-notes `
+              --latest
+          }

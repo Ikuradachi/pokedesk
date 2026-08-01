@@ -1,0 +1,2 @@
+# Auto-detect text files and keep checkouts consistent across operating systems.
+* text=auto eol=lf

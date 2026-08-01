@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' file: data:; style-src 'self'; script-src 'self'; font-src 'self' file:; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>PokeDesk</title>
+    <link rel="stylesheet" href="./settings.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to controls</a>
+
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <img src="../../assets/ui/pokedesk.png" alt="" />
+        </div>
+        <div>
+          <p class="eyebrow">DESKTOP COMPANIONS</p>
+          <h1>PokeDesk</h1>
+        </div>
+      </div>
+
+      <button
+        class="pause-button"
+        id="pause-button"
+        type="button"
+        aria-pressed="false"
+      >
+        <span class="pause-glyph" aria-hidden="true">Ⅱ</span>
+        <span id="pause-label">Pause</span>
+      </button>
+
+      <div class="roaming-status" aria-live="polite">
+        <span class="status-light" aria-hidden="true"></span>
+        <span id="status-copy">Starting companions…</span>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="onboarding-card" id="onboarding-card">
+        <div class="onboarding-icon" aria-hidden="true">↗</div>
+        <div>
+          <h2>Your desktop stays yours</h2>
+          <p>
+            Clear space passes every click through. Hover a Pokémon to reveal
+            its small hitbox, then click to pet or drag to move it.
+          </p>
+        </div>
+        <button
+          class="icon-button onboarding-close"
+          id="onboarding-close"
+          type="button"
+          aria-label="Dismiss getting started tip"
+        >
+          ×
+        </button>
+      </section>
+
+      <section class="quick-actions" aria-label="Quick actions">
+        <button class="action-button primary" id="random-button" type="button">
+          <span class="action-icon" aria-hidden="true">?</span>
+          <span>
+            <strong>Surprise me</strong>
+            <small>Spawn random</small>
+          </span>
+        </button>
+        <button
+          class="action-button secondary"
+          id="remove-all-button"
+          type="button"
+        >
+          <span class="action-icon pokeball-mini" aria-hidden="true"></span>
+          <span>
+            <strong>Recall all</strong>
+            <small>Clear desktop</small>
+          </span>
+        </button>
+      </section>
+
+      <section class="panel-card search-card" aria-labelledby="search-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">POKÉDEX</p>
+            <h2 id="search-heading">Find a companion</h2>
+          </div>
+          <span class="key-hint" aria-label="Keyboard shortcut: slash">/</span>
+        </div>
+
+        <label for="pokemon-search">Search Pokémon</label>
+        <div class="search-control">
+          <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="m16 16 4 4"></path>
+          </svg>
+          <input
+            id="pokemon-search"
+            type="search"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Try Eevee, Gengar, gen3…"
+            aria-describedby="search-help"
+          />
+          <button
+            class="clear-search"
+            id="clear-search"
+            type="button"
+            aria-label="Clear search"
+            hidden
+          >
+            ×
+          </button>
+        </div>
+        <p class="field-help" id="search-help">
+          New companions appear on the screen under your cursor.
+        </p>
+
+        <div class="results-heading">
+          <h3 id="results-title">Quick picks</h3>
+          <span id="results-count"></span>
+        </div>
+        <ul class="pokemon-list" id="search-results"></ul>
+      </section>
+
+      <section class="panel-card" aria-labelledby="team-heading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">ON DESKTOP</p>
+            <h2 id="team-heading">Your companions</h2>
+          </div>
+          <span class="count-badge" id="team-count" data-numeric>0 / 24</span>
+        </div>
+        <ul class="roster-list" id="roster-list"></ul>
+      </section>
+
+      <section class="panel-card" aria-labelledby="size-heading">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">APPEARANCE</p>
+            <h2 id="size-heading">Sprite size</h2>
+          </div>
+        </div>
+        <fieldset class="size-picker">
+          <legend class="sr-only">Choose companion sprite size</legend>
+          <label>
+            <input type="radio" name="pet-size" value="small" />
+            <span>Small</span>
+            <small>72 px</small>
+          </label>
+          <label>
+            <input type="radio" name="pet-size" value="medium" />
+            <span>Standard</span>
+            <small>96 px</small>
+          </label>
+          <label>
+            <input type="radio" name="pet-size" value="large" />
+            <span>Big</span>
+            <small>128 px</small>
+          </label>
+        </fieldset>
+      </section>
+
+      <p class="interaction-note">
+        <span aria-hidden="true">◇</span>
+        Hover = interact · clear space = click-through
+      </p>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="../../dist/renderer/settings.js"></script>
+  </body>
+</html>

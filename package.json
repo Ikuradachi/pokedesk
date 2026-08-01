@@ -1,0 +1,78 @@
+{
+  "name": "pokedesk",
+  "productName": "PokeDesk",
+  "version": "0.1.0",
+  "description": "A click-through Pokémon desktop companion.",
+  "author": "PokeDesk contributors",
+  "private": true,
+  "main": "dist/node/main/main.js",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "clean": "node scripts/clean.cjs",
+    "compile:main": "tsc -p tsconfig.main.json",
+    "compile:renderer": "esbuild src/renderer/settings.ts src/renderer/desktop.ts --bundle --outdir=dist/renderer --platform=browser --target=chrome140",
+    "typecheck:renderer": "tsc -p tsconfig.renderer.json",
+    "compile": "npm run clean && npm run compile:main && npm run compile:renderer && npm run typecheck:renderer",
+    "compile:test": "tsc -p tsconfig.test.json",
+    "dev": "npm run compile && electron .",
+    "start": "npm run dev",
+    "test": "npm run compile:test && node --test dist/test/test/catalog.test.js dist/test/test/motion.test.js dist/test/test/movement.test.js dist/test/test/state.test.js",
+    "lint": "eslint src --max-warnings=0",
+    "format": "prettier --write \"**/*.{ts,cjs,mjs,json,md,yml,html,css}\"",
+    "format:check": "prettier --check \"**/*.{ts,cjs,mjs,json,md,yml,html,css}\"",
+    "check": "npm run format:check && npm run lint && npm test && npm run compile",
+    "pack": "npm run compile && electron-builder --dir",
+    "dist:win": "npm run compile && electron-builder --win --publish never"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "^20.19.43",
+    "electron": "38.8.6",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.28.1",
+    "eslint": "10.8.0",
+    "prettier": "3.9.6",
+    "typescript": "^6.0.0",
+    "typescript-eslint": "8.65.0"
+  },
+  "build": {
+    "appId": "app.pokedesk.desktop",
+    "productName": "PokeDesk",
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "src/renderer/*.html",
+      "src/renderer/*.css",
+      "assets/**/*",
+      "package.json",
+      "README.md",
+      "THIRD_PARTY_NOTICES.md"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "artifactName": "PokeDesk-${version}-Setup.${ext}",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "PokeDesk-${version}-Portable.${ext}"
+    }
+  },
+  "allowScripts": {
+    "electron@38.8.6": true,
+    "esbuild@0.28.1": true,
+    "electron-winstaller@5.4.0": true
+  }
+}

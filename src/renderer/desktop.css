@@ -1,0 +1,329 @@
+@font-face {
+  font-family: 'Silkscreen';
+  src: url('../../assets/fonts/Silkscreen-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+:root {
+  --pet-foreground: 42 35% 94%;
+  --pet-surface: 228 22% 10%;
+  --pet-shadow: 230 40% 4%;
+  --pet-size: 96px;
+  --pokeball-frame-size: clamp(56px, calc(var(--pet-size) * 0.75), 88px);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#pet-layer {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent;
+}
+
+html,
+body {
+  pointer-events: none;
+  user-select: none;
+}
+
+#pet-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.pet {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--pet-size);
+  height: var(--pet-size);
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+  transform: translate3d(0, 0, 0);
+  contain: layout style;
+}
+
+.pet.is-spawning,
+.pet.is-despawning {
+  pointer-events: none;
+  cursor: default;
+}
+
+.pet.is-dragging {
+  cursor: grabbing;
+}
+
+.sprite-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  transform-origin: 50% 80%;
+}
+
+.pet-sprite {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+  transform: scaleX(1);
+  transform-origin: center;
+}
+
+.pet.is-petted .sprite-stage {
+  animation: pet-bounce 420ms var(--ease-out);
+}
+
+.pet.is-spawning .sprite-stage {
+  animation: pokemon-materialize 150ms ease-out 315ms both;
+}
+
+.pet.is-despawning .sprite-stage {
+  animation: pokemon-recall 220ms ease-out both;
+}
+
+.pet-label {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  max-width: 160px;
+  padding: 5px 8px;
+  overflow: hidden;
+  color: hsl(var(--pet-foreground));
+  background: hsl(var(--pet-surface) / 0.9);
+  border-radius: 7px;
+  box-shadow: 0 5px 14px hsl(var(--pet-shadow) / 0.42);
+  font-family: 'Silkscreen', monospace;
+  font-size: 9px;
+  line-height: 1.2;
+  opacity: 0;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  transform: translate(-50%, -3px);
+  transition:
+    opacity 120ms var(--ease-out),
+    transform 120ms var(--ease-out);
+  white-space: nowrap;
+}
+
+.pet.is-lower .pet-label {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform: translate(-50%, 3px);
+}
+
+.pet:hover .pet-label,
+.pet.is-dragging .pet-label {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.pet-feedback {
+  position: absolute;
+  z-index: 2;
+  top: -22px;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 8px) scale(0.92);
+}
+
+.pet.is-petted .pet-feedback {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+  transition:
+    opacity 180ms var(--ease-out),
+    transform 260ms var(--ease-out);
+}
+
+.pet.is-upper .pet-feedback {
+  top: 2px;
+  left: calc(100% - 12px);
+}
+
+.pokeball-effect {
+  position: absolute;
+  z-index: 3;
+  inset: -16%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.pokeball-sprite {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: var(--pokeball-frame-size);
+  height: var(--pokeball-frame-size);
+  background-image: url('../../assets/ui/pokeball_sprite_sheet.png');
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: var(--pokeball-frame-size)
+    calc(var(--pokeball-frame-size) * 6);
+  image-rendering: pixelated;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  will-change: background-position;
+}
+
+.pet.is-spawning .pokeball-sprite {
+  opacity: 1;
+  animation: pokeball-open 450ms steps(6) forwards;
+}
+
+.pet.is-despawning .pokeball-sprite {
+  opacity: 1;
+  animation: pokeball-close 600ms steps(6) backwards;
+}
+
+@keyframes pet-bounce {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  38% {
+    transform: translateY(-8px) scale(1.05);
+  }
+  70% {
+    transform: translateY(1px) scale(0.98);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pokemon-materialize {
+  0% {
+    opacity: 0;
+    filter: saturate(0) brightness(3) contrast(1);
+    transform: scale(0.4);
+  }
+  40% {
+    filter: saturate(0.3) brightness(1.8) contrast(1.05);
+  }
+  60% {
+    opacity: 1;
+    filter: saturate(0.8) brightness(1.1) contrast(1);
+    transform: scale(1.15);
+  }
+  100% {
+    opacity: 1;
+    filter: none;
+    transform: scale(1);
+  }
+}
+
+@keyframes pokemon-recall {
+  0% {
+    opacity: 1;
+    filter: none;
+  }
+  40% {
+    filter: saturate(0.8) brightness(1.1) contrast(1);
+    transform: scale(1.15);
+  }
+  60% {
+    opacity: 0.4;
+    filter: saturate(0.3) brightness(1.8) contrast(1.05);
+  }
+  100% {
+    opacity: 0;
+    filter: saturate(0) brightness(3) contrast(1);
+    transform: scale(0.4);
+  }
+}
+
+@keyframes pokeball-open {
+  from {
+    background-position-y: 0;
+  }
+  to {
+    background-position-y: calc(var(--pokeball-frame-size) * -6);
+  }
+}
+
+@keyframes pokeball-close {
+  from {
+    background-position-y: calc(var(--pokeball-frame-size) * -6);
+  }
+  to {
+    background-position-y: 0;
+  }
+}
+
+@keyframes pokemon-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pokemon-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes pokeball-fade {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  30%,
+  70% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet.is-petted .sprite-stage {
+    animation: none;
+  }
+
+  .pet.is-spawning .sprite-stage {
+    animation: pokemon-fade-in 120ms linear both;
+  }
+
+  .pet.is-despawning .sprite-stage {
+    animation: pokemon-fade-out 120ms linear both;
+  }
+
+  .pet.is-spawning .pokeball-sprite {
+    background-position-y: calc(var(--pokeball-frame-size) * -5);
+    animation: pokeball-fade 120ms linear both;
+  }
+
+  .pet.is-despawning .pokeball-sprite {
+    background-position-y: 0;
+    animation: pokeball-fade 120ms linear both;
+  }
+
+  .pet-label,
+  .pet-feedback {
+    transition-duration: 0.01ms !important;
+  }
+}
