@@ -29,6 +29,7 @@ import {
   type SettingsSnapshot,
 } from '../common/types';
 import { GROUND_Y } from '../common/movement';
+import { isRecord } from '../common/state';
 import { loadPokemonCatalog } from './catalog';
 import { AppStateStore } from './store';
 
@@ -304,10 +305,6 @@ function overlayDisplayForEvent(
   event: IpcMainEvent | IpcMainInvokeEvent,
 ): string | undefined {
   return overlayDisplayByWebContents.get(event.sender.id);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function parsePositionUpdates(value: unknown): PositionUpdate[] {
