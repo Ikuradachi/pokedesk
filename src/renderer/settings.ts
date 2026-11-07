@@ -17,6 +17,7 @@ function requiredElement<T extends HTMLElement>(id: string): T {
 
 const pauseButton = requiredElement<HTMLButtonElement>('pause-button');
 const pauseLabel = requiredElement<HTMLSpanElement>('pause-label');
+const pauseGlyph = pauseButton.querySelector<HTMLElement>('.pause-glyph');
 const statusCopy = requiredElement<HTMLSpanElement>('status-copy');
 const roamingStatus = document.querySelector<HTMLElement>('.roaming-status');
 const onboardingCard = requiredElement<HTMLElement>('onboarding-card');
@@ -161,15 +162,17 @@ function renderSearchResults(): void {
   }
 
   const query = searchInput.value.trim();
-  const matches = query
-    ? searchCatalog(currentState.catalog, query)
+  const rawMatches = query
+    ? searchCatalog(currentState.catalog, query, 41)
     : suggestedPokemon(currentState.catalog);
+  const hasMore = query.length > 0 && rawMatches.length > 40;
+  const matches = hasMore ? rawMatches.slice(0, 40) : rawMatches;
   const isAtCapacity = currentState.pets.length >= currentState.maxPets;
 
   clearSearchButton.hidden = query.length === 0;
   resultsTitle.textContent = query ? 'Search results' : 'Quick picks';
   resultsCount.textContent = query
-    ? `${matches.length}${matches.length === 40 ? '+' : ''}`
+    ? `${matches.length}${hasMore ? '+' : ''}`
     : '';
   searchResults.replaceChildren();
 
@@ -291,9 +294,9 @@ function render(): void {
     preferences.paused ? 'true' : 'false',
   );
   pauseLabel.textContent = preferences.paused ? 'Resume' : 'Pause';
-  pauseButton.querySelector('.pause-glyph')!.textContent = preferences.paused
-    ? '▶'
-    : 'Ⅱ';
+  if (pauseGlyph) {
+    pauseGlyph.textContent = preferences.paused ? '▶' : 'Ⅱ';
+  }
 
   onboardingCard.hidden = preferences.onboardingDismissed;
   removeAllButton.disabled = count === 0;

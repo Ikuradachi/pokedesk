@@ -464,7 +464,7 @@ function registerIpc(): void {
           pet.direction = update.direction;
         }
       }
-    });
+    }, false);
   });
 }
 
@@ -492,8 +492,10 @@ function createSettingsWindow(): void {
     window.show();
     window.focus();
   });
-  window.on('close', () => {
+  window.on('close', (event) => {
     if (!isQuitting) {
+      event.preventDefault();
+      window.hide();
       showTrayHintOnce();
     }
   });
@@ -581,15 +583,18 @@ function syncDisplayWindows(): void {
     }
   }
 
-  let reassignedPet = false;
-  getStateStore().update((state) => {
-    for (const pet of state.pets) {
-      if (!activeDisplayIds.has(pet.displayId)) {
-        pet.displayId = primaryDisplayId;
-        reassignedPet = true;
+  const petsToReassign = getStateStore().state.pets.filter(
+    (pet) => !activeDisplayIds.has(pet.displayId),
+  );
+  if (petsToReassign.length > 0) {
+    getStateStore().update((state) => {
+      for (const pet of state.pets) {
+        if (!activeDisplayIds.has(pet.displayId)) {
+          pet.displayId = primaryDisplayId;
+        }
       }
-    }
-  });
+    });
+  }
 
   for (const display of displays) {
     const displayId = String(display.id);
@@ -601,9 +606,6 @@ function syncDisplayWindows(): void {
     }
   }
 
-  if (reassignedPet) {
-    getStateStore().save();
-  }
   broadcastState();
 }
 
@@ -773,6 +775,7 @@ function initialize(): void {
 
 app.on('before-quit', () => {
   isQuitting = true;
+  stateStore?.flush();
 });
 app.on('window-all-closed', () => {
   // Tray owns app lifetime.

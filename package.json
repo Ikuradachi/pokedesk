@@ -18,7 +18,7 @@
     "compile:test": "tsc -p tsconfig.test.json",
     "dev": "npm run compile && electron .",
     "start": "npm run dev",
-    "test": "npm run compile:test && node --test dist/test/test/catalog.test.js dist/test/test/motion.test.js dist/test/test/movement.test.js dist/test/test/state.test.js",
+    "test": "npm run compile:test && node --test dist/test/test/catalog.test.js dist/test/test/motion.test.js dist/test/test/movement.test.js dist/test/test/state.test.js dist/test/test/store.test.js",
     "lint": "eslint src --max-warnings=0",
     "format": "prettier --write \"**/*.{ts,cjs,mjs,json,md,yml,html,css}\"",
     "format:check": "prettier --check \"**/*.{ts,cjs,mjs,json,md,yml,html,css}\"",
@@ -49,6 +49,8 @@
       "src/renderer/*.html",
       "src/renderer/*.css",
       "assets/**/*",
+      "!assets/demo.png",
+      "!assets/**/shiny_*.gif",
       "package.json",
       "README.md",
       "THIRD_PARTY_NOTICES.md"

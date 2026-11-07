@@ -1,4 +1,10 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from 'node:fs';
 import { dirname } from 'node:path';
 import { createEmptyState, sanitizePersistedState } from '../common/state';
 import type { PersistedState } from '../common/types';
@@ -6,6 +12,7 @@ import type { PersistedState } from '../common/types';
 export class AppStateStore {
   readonly isFirstRun: boolean;
   private stateValue: PersistedState;
+  private saveTimer?: NodeJS.Timeout;
 
   constructor(
     private readonly filePath: string,
@@ -20,22 +27,50 @@ export class AppStateStore {
     return this.stateValue;
   }
 
-  update(mutator: (state: PersistedState) => void): void {
+  update(mutator: (state: PersistedState) => void, immediate = true): void {
     mutator(this.stateValue);
-    this.save();
+    if (immediate) {
+      this.save();
+    } else {
+      this.scheduleSave();
+    }
+  }
+
+  flush(): void {
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer);
+      this.saveTimer = undefined;
+      this.save();
+    }
   }
 
   save(): void {
+    if (this.saveTimer) {
+      clearTimeout(this.saveTimer);
+      this.saveTimer = undefined;
+    }
     try {
       mkdirSync(dirname(this.filePath), { recursive: true });
+      const temporaryPath = `${this.filePath}.${process.pid}.tmp`;
       writeFileSync(
-        this.filePath,
+        temporaryPath,
         `${JSON.stringify(this.stateValue, null, 2)}\n`,
         'utf8',
       );
+      renameSync(temporaryPath, this.filePath);
     } catch (error: unknown) {
       console.error('Unable to save PokeDesk state:', error);
     }
+  }
+
+  private scheduleSave(delayMs = 1000): void {
+    if (this.saveTimer) {
+      return;
+    }
+    this.saveTimer = setTimeout(() => {
+      this.saveTimer = undefined;
+      this.save();
+    }, delayMs);
   }
 
   private read(

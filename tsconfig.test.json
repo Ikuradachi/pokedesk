@@ -8,5 +8,5 @@
     "lib": ["ES2022"],
     "types": ["node"]
   },
-  "include": ["src/common/**/*.ts", "src/test/**/*.ts"]
+  "include": ["src/common/**/*.ts", "src/main/store.ts", "src/test/**/*.ts"]
 }

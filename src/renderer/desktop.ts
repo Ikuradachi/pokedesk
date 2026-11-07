@@ -12,6 +12,7 @@ interface DragState {
   pointerId: number;
   startClientX: number;
   startClientY: number;
+  lastClientX: number;
   startX: number;
   startY: number;
   moved: boolean;
@@ -253,6 +254,7 @@ function beginDrag(runtime: RuntimePet, event: PointerEvent): void {
     pointerId: event.pointerId,
     startClientX: event.clientX,
     startClientY: event.clientY,
+    lastClientX: event.clientX,
     startX: runtime.x,
     startY: runtime.y,
     moved: false,
@@ -272,6 +274,8 @@ function moveDrag(runtime: RuntimePet, event: PointerEvent): void {
   const bounds = travelBounds();
   const deltaX = event.clientX - drag.startClientX;
   const deltaY = event.clientY - drag.startClientY;
+  const stepDeltaX = event.clientX - drag.lastClientX;
+  drag.lastClientX = event.clientX;
   const effectiveDeltaY = isGrounded(runtime) ? 0 : deltaY;
   const previousX = runtime.x;
   const previousY = runtime.y;
@@ -285,8 +289,8 @@ function moveDrag(runtime: RuntimePet, event: PointerEvent): void {
   runtime.x = position.x;
   runtime.y = position.y;
 
-  if (Math.abs(deltaX) > 1) {
-    runtime.direction = deltaX < 0 ? -1 : 1;
+  if (Math.abs(stepDeltaX) > 1) {
+    runtime.direction = stepDeltaX < 0 ? -1 : 1;
   }
   if (
     runtime.x !== previousX ||
@@ -317,6 +321,7 @@ function endDrag(runtime: RuntimePet, event: PointerEvent): void {
   }
 
   sendPositions();
+  refreshMousePassthrough();
 }
 
 function lifecycleAnimationDuration(duration: number): number {
@@ -628,6 +633,12 @@ window.addEventListener('mouseleave', () => {
   lastPointerX = -1;
   lastPointerY = -1;
   refreshMousePassthrough();
+});
+
+window.addEventListener('resize', () => {
+  for (const runtime of runtimePets.values()) {
+    renderPosition(runtime);
+  }
 });
 
 window.addEventListener('beforeunload', () => {

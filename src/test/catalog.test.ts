@@ -29,11 +29,16 @@ describe('Pokémon catalog helpers', () => {
     assert.equal(humanizePokemonId('nidoran_female'), 'Nidoran ♀');
     assert.equal(humanizePokemonId('rotom_wash'), 'Rotom Wash');
     assert.equal(humanizePokemonId('mimeJr'), 'Mime Jr.');
+    assert.equal(humanizePokemonId('hooh'), 'Ho-Oh');
   });
 
-  it('normalizes punctuation and accents for search', () => {
+  it('normalizes punctuation, gender symbols, and accents for search', () => {
     assert.equal(normalizeSearchText('Mr. Mime'), 'mrmime');
     assert.equal(normalizeSearchText('Pokémon'), 'pokemon');
+    assert.equal(normalizeSearchText('Nidoran ♀'), 'nidoranfemale');
+    assert.equal(normalizeSearchText('Nidoran ♂'), 'nidoranmale');
+    assert.equal(normalizeSearchText('♀'), 'female');
+    assert.equal(normalizeSearchText('♂'), 'male');
   });
 
   it('searches by display name and generation', () => {

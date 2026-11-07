@@ -2,13 +2,26 @@ import type { PokemonDefinition } from './types';
 
 const SPECIAL_NAMES: Readonly<Record<string, string>> = {
   farfetchd: "Farfetch'd",
-  hoOh: 'Ho-Oh',
+  hooh: 'Ho-Oh',
   mimeJr: 'Mime Jr.',
   mrmime: 'Mr. Mime',
   nidoran_female: 'Nidoran ♀',
   nidoran_male: 'Nidoran ♂',
   porygonZ: 'Porygon-Z',
 };
+
+const searchCache = new WeakMap<PokemonDefinition, string>();
+
+function searchIndexFor(pokemon: PokemonDefinition): string {
+  let cached = searchCache.get(pokemon);
+  if (!cached) {
+    cached = normalizeSearchText(
+      `${pokemon.name} ${pokemon.id} gen${pokemon.generation}`,
+    );
+    searchCache.set(pokemon, cached);
+  }
+  return cached;
+}
 
 export function humanizePokemonId(id: string): string {
   const specialName = SPECIAL_NAMES[id];
@@ -26,6 +39,8 @@ export function normalizeSearchText(value: string): string {
   return value
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
+    .replace(/♀/g, ' female ')
+    .replace(/♂/g, ' male ')
     .replace(/[^a-zA-Z0-9]+/g, '')
     .toLowerCase();
 }
@@ -41,11 +56,6 @@ export function searchCatalog(
   }
 
   return catalog
-    .filter((pokemon) => {
-      const searchValue = normalizeSearchText(
-        `${pokemon.name} ${pokemon.id} gen${pokemon.generation}`,
-      );
-      return searchValue.includes(normalizedQuery);
-    })
+    .filter((pokemon) => searchIndexFor(pokemon).includes(normalizedQuery))
     .slice(0, limit);
 }
